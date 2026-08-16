@@ -868,16 +868,24 @@ const COLORS = [
 
 let leaves = [];
 
+
+/* =========================================================
+   FIREBASE REALTIME DATABASE
+========================================================= */
+
 const treeRef =
-    window.firebaseAPI.ref(
-        window.firebaseAPI.database,
+    window.firebaseRef(
+        window.firebaseDatabase,
         "ourClassTree"
     );
 
 
 /* รับข้อมูลจาก Firebase แบบเรียลไทม์ */
 
-treeRef.on("value", snapshot => {
+window.firebaseOnValue(
+    treeRef,
+    (snapshot) => {
+
         const data =
             snapshot.val();
 
@@ -898,7 +906,6 @@ treeRef.on("value", snapshot => {
 
     }
 );
-
 let selectedLeaf = null;
 
 let pendingPosition = null;
@@ -980,8 +987,10 @@ function saveTree() {
         }
     );
 
-    treeRef.set(data);
-
+   window.firebaseSet(
+    treeRef,
+    data
+   );
     updateCounter();
 
 }
