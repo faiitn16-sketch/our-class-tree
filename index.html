@@ -758,6 +758,10 @@ let pointers = new Map();
 
 let gesture = null;
 
+let holdTimer = null;
+
+let holdStart = null;
+
 let W = 0;
 
 let H = 0;
@@ -1369,22 +1373,38 @@ canvas.addEventListener(
 
         else {
 
-            selectedLeaf =
-                null;
+    selectedLeaf = null;
 
+    pendingPosition = {
+        x: point.x,
+        y: point.y
+    };
 
-            pendingPosition = {
+    gesture = null;
 
-                x: point.x,
+    /* เริ่มจับเวลา 3 วินาที */
 
-                y: point.y
+    holdStart = Date.now();
 
-            };
+    clearTimeout(holdTimer);
 
+    holdTimer = setTimeout(() => {
 
-            gesture = null;
+        /* เปิดช่องชื่อเมื่อวางค้างครบ 3 วินาที */
 
-        }
+        modal.classList.add("show");
+
+        nameInput.value = "";
+
+        setTimeout(() => {
+            nameInput.focus();
+        }, 80);
+
+        holdStart = null;
+
+    }, 3000);
+
+}
 
 
         draw();
@@ -1563,6 +1583,17 @@ function pointerEnd(
         event.pointerId
     );
 
+/* ถ้าปล่อยมือก่อนครบ 3 วินาที ให้ยกเลิก */
+
+if (holdTimer) {
+
+    clearTimeout(holdTimer);
+
+    holdTimer = null;
+
+    holdStart = null;
+
+}
 
     if (
         pointers.size === 0
@@ -1587,31 +1618,6 @@ function pointerEnd(
             draw();
 
         }
-
-        else if (
-            pendingPosition
-        ) {
-
-            modal.classList.add(
-                "show"
-            );
-
-
-            nameInput.value =
-                "";
-
-
-            setTimeout(
-                () => {
-
-                    nameInput.focus();
-
-                },
-                80
-            );
-
-        }
-
 
         pendingPosition =
             null;
