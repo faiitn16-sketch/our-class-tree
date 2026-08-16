@@ -1203,7 +1203,7 @@ function drawHandGuide() {
     }
 
     const size =
-        Math.min(W, H) * 0.50;
+        Math.min(W, H) * 0.28;
 
     const ratio =
         handGuideImage.height /
@@ -1219,13 +1219,17 @@ function drawHandGuide() {
 
     ctx.globalAlpha = 0.75;
 
+    ctx.filter = "brightness(0) invert(1)";
+
     ctx.drawImage(
-        handGuideImage,
-        x - width / 2,
-        y - height / 2,
-        width,
-        height
-    );
+    handGuideImage,
+    x - width / 2,
+    y - height / 2,
+    width,
+    height
+);
+
+    ctx.filter = "none";
 
     ctx.restore();
 }
