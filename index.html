@@ -767,7 +767,13 @@ let W = 0;
 let H = 0;
 
 let DPR = 1;
-      
+
+const handGuideImage = new Image();
+handGuideImage.src = "handguide.png";
+
+handGuideImage.onload = () => {
+    draw();
+};
 /* =========================================================
    IMAGES
 ========================================================= */
@@ -1180,6 +1186,43 @@ function createColoredHand(color) {
    DRAW EVERYTHING
 ========================================================= */
 
+function drawHandGuide() {
+
+    if (
+        !handGuideImage.complete ||
+        !handGuideImage.naturalWidth
+    ) {
+        return;
+    }
+
+    const size =
+        Math.min(W, H) * 0.28;
+
+    const ratio =
+        handGuideImage.height /
+        handGuideImage.width;
+
+    const width = size;
+    const height = size * ratio;
+
+    const x = W / 2;
+    const y = H * 0.55;
+
+    ctx.save();
+
+    ctx.globalAlpha = 0.45;
+
+    ctx.drawImage(
+        handGuideImage,
+        x - width / 2,
+        y - height / 2,
+        width,
+        height
+    );
+
+    ctx.restore();
+}
+      
 function draw() {
 
     ctx.clearRect(
@@ -1190,7 +1233,8 @@ function draw() {
     );
 
     drawBackground();
-
+    
+    drawHandGuide();
 
     for (
         const leaf
