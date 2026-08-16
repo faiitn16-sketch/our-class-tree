@@ -781,29 +781,72 @@ body {
 
 <!-- Firebase -->
 <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
-    import { getDatabase } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
+
+    import { initializeApp }
+        from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+
+    import {
+        getDatabase,
+        ref,
+        set,
+        onValue
+    }
+        from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
+
 
     const firebaseConfig = {
+
         apiKey: "AIzaSyCoqXj41sxtaRszOH9TbenwFlVjUHgwiAA",
-        authDomain: "our-class-tree-ef0e9.firebaseapp.com",
-        databaseURL: "https://our-class-tree-ef0e9-default-rtdb.firebaseio.com",
-        projectId: "our-class-tree-ef0e9",
-        storageBucket: "our-class-tree-ef0e9.firebasestorage.app",
-        messagingSenderId: "401725741242",
-        appId: "1:401725741242:web:8b416b2492b1328c4e0a83"
+
+        authDomain:
+            "our-class-tree-ef0e9.firebaseapp.com",
+
+        databaseURL:
+            "https://our-class-tree-ef0e9-default-rtdb.firebaseio.com",
+
+        projectId:
+            "our-class-tree-ef0e9",
+
+        storageBucket:
+            "our-class-tree-ef0e9.firebasestorage.app",
+
+        messagingSenderId:
+            "401725741242",
+
+        appId:
+            "1:401725741242:web:8b416b2492b1328c4e0a83"
+
     };
+
 
     const firebaseApp =
         initializeApp(firebaseConfig);
 
+
     const database =
         getDatabase(firebaseApp);
 
-    console.log("Firebase connected!");
+
+    /* ทำให้โค้ดส่วนอื่นของเว็บเรียกใช้ได้ */
+
+    window.firebaseDatabase =
+        database;
+
+    window.firebaseRef =
+        ref;
+
+    window.firebaseSet =
+        set;
+
+    window.firebaseOnValue =
+        onValue;
+
+
+    console.log(
+        "Firebase connected!"
+    );
+
 </script>
-
-
 <script>
 
 /* =========================================================
@@ -867,11 +910,41 @@ const COLORS = [
 ];
 
 
-let leaves =
-    JSON.parse(
-        localStorage.getItem("ourClassTree") || "[]"
+let leaves = [];
+
+const treeRef =
+    window.firebaseRef(
+        window.firebaseDatabase,
+        "ourClassTree"
     );
 
+
+/* รับข้อมูลจาก Firebase แบบเรียลไทม์ */
+
+window.firebaseOnValue(
+    treeRef,
+    snapshot => {
+
+        const data =
+            snapshot.val();
+
+        if (data) {
+
+            leaves =
+                Object.values(data);
+
+        } else {
+
+            leaves = [];
+
+        }
+
+        updateCounter();
+
+        draw();
+
+    }
+);
 
 let selectedLeaf = null;
 
@@ -942,12 +1015,27 @@ leafImage.onload = () => {
 
 function saveTree() {
 
-    localStorage.setItem(
-        "ourClassTree",
-        JSON.stringify(leaves)
+    const data = {};
+
+
+    leaves.forEach(
+        leaf => {
+
+            data[leaf.id] =
+                leaf;
+
+        }
     );
 
+
+    window.firebaseSet(
+        treeRef,
+        data
+    );
+
+
     updateCounter();
+
 }
 
 
