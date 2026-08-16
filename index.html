@@ -1,0 +1,2276 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+
+<meta name="viewport"
+      content="width=device-width,
+               initial-scale=1.0,
+               maximum-scale=1.0,
+               user-scalable=no,
+               viewport-fit=cover">
+
+<title>Our Class Tree</title>
+
+<style>
+
+/* =========================================================
+   BASIC
+========================================================= */
+
+:root {
+    --green-dark: #25443a;
+    --green: #4e9d6e;
+    --cream: #fff9ed;
+    --white: rgba(255,255,255,.94);
+    --shadow: 0 10px 30px rgba(65,53,33,.15);
+}
+
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+
+    margin: 0;
+
+    width: 100%;
+    height: 100%;
+
+    overflow: hidden;
+
+    background: #f7ecd4;
+
+    font-family:
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Noto Sans Thai",
+        sans-serif;
+
+    color: var(--green-dark);
+}
+
+/* =========================================================
+   APP
+========================================================= */
+
+#app {
+
+    position: fixed;
+
+    inset: 0;
+
+    overflow: hidden;
+
+    touch-action: none;
+}
+
+/* Canvas */
+
+#treeCanvas {
+
+    position: absolute;
+
+    inset: 0;
+
+    width: 100%;
+    height: 100%;
+
+    display: block;
+
+    touch-action: none;
+}
+
+/* =========================================================
+   UI
+========================================================= */
+
+.hud {
+
+    position: absolute;
+
+    inset: 0;
+
+    z-index: 10;
+
+    pointer-events: none;
+}
+
+/* ---------------------------------------------------------
+   TITLE
+--------------------------------------------------------- */
+
+.top {
+
+    position: absolute;
+
+    top: max(14px, env(safe-area-inset-top));
+
+    left: 50%;
+
+    transform: translateX(-50%);
+
+    width: min(94vw, 760px);
+
+    text-align: center;
+}
+
+.title {
+
+    margin: 0;
+
+    font-size: clamp(28px, 4vw, 48px);
+
+    font-weight: 800;
+
+    letter-spacing: .5px;
+
+    text-shadow: 0 2px 0 rgba(255,255,255,.5);
+}
+
+.prompt {
+
+    display: inline-block;
+
+    margin-top: 6px;
+
+    padding: 9px 17px;
+
+    border-radius: 999px;
+
+    background: rgba(255,255,255,.86);
+
+    box-shadow: var(--shadow);
+
+    font-size: clamp(14px, 2vw, 20px);
+
+    font-weight: 600;
+}
+
+.hint {
+
+    margin-top: 7px;
+
+    font-size: 12px;
+
+    opacity: .65;
+}
+
+/* ---------------------------------------------------------
+   TEACHER BUTTON
+--------------------------------------------------------- */
+
+.teacher-button {
+
+    pointer-events: auto;
+
+    position: absolute;
+
+    right: max(12px, env(safe-area-inset-right));
+
+    top: max(12px, env(safe-area-inset-top));
+
+    width: 44px;
+
+    height: 44px;
+
+    border: none;
+
+    border-radius: 50%;
+
+    background: rgba(255,255,255,.78);
+
+    box-shadow: var(--shadow);
+
+    font-size: 19px;
+
+    opacity: .55;
+}
+
+.teacher-button:active {
+
+    transform: scale(.94);
+}
+
+/* ---------------------------------------------------------
+   COUNTER
+--------------------------------------------------------- */
+
+.counter {
+
+    position: absolute;
+
+    left: max(12px, env(safe-area-inset-left));
+
+    bottom: max(12px, env(safe-area-inset-bottom));
+
+    padding: 8px 14px;
+
+    border-radius: 999px;
+
+    background: rgba(255,255,255,.84);
+
+    box-shadow: var(--shadow);
+
+    font-size: 14px;
+}
+
+/* ---------------------------------------------------------
+   TOUCH INDICATOR
+--------------------------------------------------------- */
+
+.touch-indicator {
+
+    position: absolute;
+
+    width: 56px;
+
+    height: 56px;
+
+    border-radius: 50%;
+
+    border: 3px solid white;
+
+    box-shadow:
+        0 0 0 7px rgba(255,255,255,.2);
+
+    transform: translate(-50%, -50%);
+
+    display: none;
+
+    animation: touchPulse .8s infinite;
+}
+
+@keyframes touchPulse {
+
+    50% {
+
+        transform:
+            translate(-50%, -50%)
+            scale(1.12);
+
+        opacity: .55;
+    }
+}
+
+/* =========================================================
+   NAME MODAL
+========================================================= */
+
+.modal {
+
+    position: absolute;
+
+    inset: 0;
+
+    z-index: 30;
+
+    display: none;
+
+    align-items: center;
+
+    justify-content: center;
+
+    padding: 20px;
+
+    background: rgba(38,53,43,.28);
+
+    backdrop-filter: blur(5px);
+
+    pointer-events: auto;
+}
+
+.modal.show {
+
+    display: flex;
+}
+
+.modal-card {
+
+    width: min(92vw, 430px);
+
+    background: var(--white);
+
+    border-radius: 28px;
+
+    padding: 28px;
+
+    box-shadow:
+        0 24px 70px rgba(33,35,25,.25);
+
+    text-align: center;
+}
+
+.modal-icon {
+
+    font-size: 48px;
+}
+
+.modal-title {
+
+    margin: 6px 0 7px;
+
+    font-size: 27px;
+}
+
+.modal-text {
+
+    margin: 0 0 18px;
+
+    opacity: .7;
+}
+
+/* ---------------------------------------------------------
+   INPUT
+--------------------------------------------------------- */
+
+.name-input {
+
+    width: 100%;
+
+    border: 2px solid #e6dcc8;
+
+    background: #fffdf7;
+
+    border-radius: 17px;
+
+    padding: 14px 16px;
+
+    outline: none;
+
+    text-align: center;
+
+    font-size: 20px;
+
+    color: var(--green-dark);
+}
+
+.name-input:focus {
+
+    border-color: #86b99b;
+}
+
+/* ---------------------------------------------------------
+   ACTIONS
+--------------------------------------------------------- */
+
+.modal-actions {
+
+    display: flex;
+
+    gap: 10px;
+
+    margin-top: 14px;
+}
+
+.modal-actions button {
+
+    flex: 1;
+
+    border: none;
+
+    border-radius: 16px;
+
+    padding: 13px;
+
+    font-weight: 750;
+
+    font-size: 16px;
+}
+
+.cancel-button {
+
+    background: #eee8dc;
+
+    color: #5d625b;
+}
+
+.add-button {
+
+    background: var(--green);
+
+    color: white;
+}
+
+/* =========================================================
+   TEACHER PANEL
+========================================================= */
+
+.teacher-panel {
+
+    display: none;
+
+    position: absolute;
+
+    z-index: 40;
+
+    right: 12px;
+
+    top: 64px;
+
+    width: min(92vw, 340px);
+
+    background: white;
+
+    border-radius: 22px;
+
+    padding: 18px;
+
+    box-shadow: var(--shadow);
+
+    pointer-events: auto;
+}
+
+.teacher-panel.show {
+
+    display: block;
+}
+
+.teacher-panel h3 {
+
+    margin: 0 0 10px;
+}
+
+.teacher-panel button {
+
+    width: 100%;
+
+    border: none;
+
+    border-radius: 13px;
+
+    padding: 12px;
+
+    margin-top: 8px;
+
+    background: #f1eadc;
+
+    font-size: 15px;
+}
+
+.teacher-panel .danger {
+
+    background: #f7d8d2;
+
+    color: #7a2f28;
+}
+
+.teacher-panel small {
+
+    display: block;
+
+    margin-top: 10px;
+
+    opacity: .6;
+
+    line-height: 1.4;
+}
+
+/* =========================================================
+   TOAST
+========================================================= */
+
+.toast {
+
+    position: absolute;
+
+    z-index: 50;
+
+    left: 50%;
+
+    bottom: 70px;
+
+    transform:
+        translate(-50%, 10px);
+
+    background: #284d3c;
+
+    color: white;
+
+    padding: 10px 17px;
+
+    border-radius: 999px;
+
+    opacity: 0;
+
+    transition: .25s;
+
+    pointer-events: none;
+
+    white-space: nowrap;
+}
+
+.toast.show {
+
+    opacity: 1;
+
+    transform:
+        translate(-50%, 0);
+}
+
+</style>
+</head>
+
+
+<body>
+
+<div id="app">
+
+    <!-- =====================================================
+         CANVAS
+    ====================================================== -->
+
+    <canvas id="treeCanvas"></canvas>
+
+
+    <!-- =====================================================
+         UI
+    ====================================================== -->
+
+    <div class="hud">
+
+        <div class="top">
+
+            <h1 class="title">
+                🌳 Our Class Tree
+            </h1>
+
+            <div class="prompt">
+                วางมือบนหน้าจอ แล้วพิมพ์ชื่อของเรา!
+            </div>
+
+            <div class="hint">
+                แตะเพื่อเพิ่มมือ • ลากเพื่อย้าย •
+                ใช้สองนิ้วเพื่อหมุนและปรับขนาด
+            </div>
+
+        </div>
+
+
+        <button
+            class="teacher-button"
+            id="teacherButton">
+
+            ⚙️
+
+        </button>
+
+
+        <div
+            class="counter"
+            id="counter">
+
+            ใบไม้ของเรา 0 ใบ
+
+        </div>
+
+
+        <div
+            class="touch-indicator"
+            id="touchIndicator">
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         NAME MODAL
+    ====================================================== -->
+
+    <div
+        class="modal"
+        id="nameModal">
+
+        <form
+            class="modal-card"
+            id="nameForm">
+
+            <div class="modal-icon">
+                🖐️
+            </div>
+
+            <h2 class="modal-title">
+                มือของใครเอ่ย?
+            </h2>
+
+            <p class="modal-text">
+                ใส่ชื่อ แล้วนำมือของเราไปวางบนต้นไม้
+            </p>
+
+            <input
+                id="nameInput"
+                class="name-input"
+                maxlength="24"
+                autocomplete="off"
+                placeholder="ชื่อ / Name"
+                required
+            >
+
+            <div class="modal-actions">
+
+                <button
+                    type="button"
+                    class="cancel-button"
+                    id="cancelButton">
+
+                    ยกเลิก
+
+                </button>
+
+                <button
+                    type="submit"
+                    class="add-button">
+
+                    เพิ่มลงต้นไม้ 🌿
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+
+    <!-- =====================================================
+         TEACHER PANEL
+    ====================================================== -->
+
+    <div
+        class="teacher-panel"
+        id="teacherPanel">
+
+        <h3>
+            ⚙️ Teacher Controls
+        </h3>
+
+        <button id="exportButton">
+
+            📸 บันทึกภาพต้นไม้
+
+        </button>
+
+        <button
+            class="danger"
+            id="clearButton">
+
+            🗑️ ล้างต้นไม้ทั้งหมด
+
+        </button>
+
+        <button id="closeTeacherButton">
+
+            ปิด
+
+        </button>
+
+        <small>
+
+            ข้อมูลมือจะถูกเก็บไว้ใน LocalStorage
+            ของเครื่องนี้
+
+        </small>
+
+    </div>
+
+
+    <!-- =====================================================
+         TOAST
+    ====================================================== -->
+
+    <div
+        class="toast"
+        id="toast">
+    </div>
+
+</div>
+
+
+<script>
+
+/* =========================================================
+   ELEMENTS
+========================================================= */
+
+const canvas =
+    document.getElementById("treeCanvas");
+
+const ctx =
+    canvas.getContext("2d");
+
+const modal =
+    document.getElementById("nameModal");
+
+const nameForm =
+    document.getElementById("nameForm");
+
+const nameInput =
+    document.getElementById("nameInput");
+
+const touchIndicator =
+    document.getElementById("touchIndicator");
+
+const counter =
+    document.getElementById("counter");
+
+const teacherButton =
+    document.getElementById("teacherButton");
+
+const teacherPanel =
+    document.getElementById("teacherPanel");
+
+const toast =
+    document.getElementById("toast");
+
+
+/* =========================================================
+   DATA
+========================================================= */
+
+const COLORS = [
+
+    "#8BCB88",
+    "#FF9B5C",
+    "#FFD45C",
+    "#70B7E8",
+    "#D99BEA",
+    "#F28BA8",
+    "#79D5C5",
+    "#FFB86B"
+
+];
+
+
+let leaves =
+    JSON.parse(
+        localStorage.getItem("ourClassTree") || "[]"
+    );
+
+
+let selectedLeaf = null;
+
+let pendingPosition = null;
+
+let pointers = new Map();
+
+let gesture = null;
+
+let W = 0;
+
+let H = 0;
+
+let DPR = 1;
+
+
+/* =========================================================
+   LOCAL STORAGE
+========================================================= */
+
+function saveTree() {
+
+    localStorage.setItem(
+        "ourClassTree",
+        JSON.stringify(leaves)
+    );
+
+    updateCounter();
+}
+
+
+function updateCounter() {
+
+    counter.textContent =
+        `ใบไม้ของเรา ${leaves.length} ใบ`;
+}
+
+
+/* =========================================================
+   RESIZE
+========================================================= */
+
+function resizeCanvas() {
+
+    DPR =
+        Math.min(
+            window.devicePixelRatio || 1,
+            2
+        );
+
+    W = window.innerWidth;
+
+    H = window.innerHeight;
+
+    canvas.width =
+        W * DPR;
+
+    canvas.height =
+        H * DPR;
+
+    canvas.style.width =
+        W + "px";
+
+    canvas.style.height =
+        H + "px";
+
+    ctx.setTransform(
+        DPR,
+        0,
+        0,
+        DPR,
+        0,
+        0
+    );
+
+    draw();
+}
+
+
+window.addEventListener(
+    "resize",
+    resizeCanvas
+);
+
+
+/* =========================================================
+   BACKGROUND
+========================================================= */
+
+function drawBackground() {
+
+    /* sky */
+
+    const gradient =
+        ctx.createLinearGradient(
+            0,
+            0,
+            0,
+            H
+        );
+
+    gradient.addColorStop(
+        0,
+        "#dff2e4"
+    );
+
+    gradient.addColorStop(
+        0.5,
+        "#f7efd8"
+    );
+
+    gradient.addColorStop(
+        1,
+        "#efd8b3"
+    );
+
+    ctx.fillStyle =
+        gradient;
+
+    ctx.fillRect(
+        0,
+        0,
+        W,
+        H
+    );
+
+
+    /* sun */
+
+    const sun =
+        ctx.createRadialGradient(
+            W * .78,
+            H * .16,
+            10,
+            W * .78,
+            H * .16,
+            Math.min(W,H) * .25
+        );
+
+    sun.addColorStop(
+        0,
+        "rgba(255,244,175,.65)"
+    );
+
+    sun.addColorStop(
+        1,
+        "rgba(255,244,175,0)"
+    );
+
+    ctx.fillStyle =
+        sun;
+
+    ctx.fillRect(
+        0,
+        0,
+        W,
+        H
+    );
+
+
+    /* ground */
+
+    ctx.fillStyle =
+        "#b9cf91";
+
+    ctx.beginPath();
+
+    ctx.ellipse(
+        W * .5,
+        H * 1.05,
+        W * .72,
+        H * .17,
+        0,
+        0,
+        Math.PI * 2
+    );
+
+    ctx.fill();
+
+
+    ctx.fillStyle =
+        "#d7e1aa";
+
+    ctx.beginPath();
+
+    ctx.ellipse(
+        W * .5,
+        H * 1.02,
+        W * .52,
+        H * .10,
+        0,
+        0,
+        Math.PI * 2
+    );
+
+    ctx.fill();
+
+
+    /* tree */
+
+    ctx.save();
+
+    ctx.lineCap =
+        "round";
+
+    ctx.lineJoin =
+        "round";
+
+
+    const trunkX =
+        W * .50;
+
+
+    ctx.strokeStyle =
+        "#6b4a2f";
+
+    ctx.lineWidth =
+        Math.max(
+            22,
+            W * .035
+        );
+
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        trunkX,
+        H + 20
+    );
+
+    ctx.quadraticCurveTo(
+        W * .47,
+        H * .68,
+        W * .49,
+        H * .49
+    );
+
+    ctx.stroke();
+
+
+    ctx.lineWidth =
+        Math.max(
+            13,
+            W * .022
+        );
+
+
+    const branches = [
+
+        [
+            trunkX,
+            H * .62,
+            W * .22,
+            H * .30
+        ],
+
+        [
+            trunkX,
+            H * .57,
+            W * .75,
+            H * .28
+        ],
+
+        [
+            trunkX,
+            H * .49,
+            W * .33,
+            H * .17
+        ],
+
+        [
+            trunkX,
+            H * .46,
+            W * .64,
+            H * .12
+        ],
+
+        [
+            W * .25,
+            H * .30,
+            W * .11,
+            H * .17
+        ],
+
+        [
+            W * .75,
+            H * .28,
+            W * .87,
+            H * .14
+        ],
+
+        [
+            W * .33,
+            H * .17,
+            W * .23,
+            H * .08
+        ],
+
+        [
+            W * .64,
+            H * .12,
+            W * .73,
+            H * .05
+        ]
+
+    ];
+
+
+    for (
+        const branch
+        of branches
+    ) {
+
+        const [
+            x1,
+            y1,
+            x2,
+            y2
+        ] = branch;
+
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            x1,
+            y1
+        );
+
+        ctx.quadraticCurveTo(
+            (x1 + x2) / 2,
+            y1 - 25,
+            x2,
+            y2
+        );
+
+        ctx.stroke();
+
+    }
+
+
+    ctx.restore();
+
+}
+
+
+/* =========================================================
+   HAND SHAPE
+========================================================= */
+
+function createHandPath(
+    x,
+    y,
+    scale,
+    rotation
+) {
+
+    ctx.save();
+
+    ctx.translate(
+        x,
+        y
+    );
+
+    ctx.rotate(
+        rotation
+    );
+
+    ctx.scale(
+        scale,
+        scale
+    );
+
+
+    ctx.beginPath();
+
+
+    /* palm */
+
+    ctx.moveTo(
+        -34,
+        42
+    );
+
+    ctx.quadraticCurveTo(
+        -47,
+        22,
+        -39,
+        0
+    );
+
+
+    /* thumb */
+
+    ctx.quadraticCurveTo(
+        -69,
+        -7,
+        -72,
+        -25
+    );
+
+    ctx.quadraticCurveTo(
+        -73,
+        -37,
+        -64,
+        -41
+    );
+
+    ctx.quadraticCurveTo(
+        -54,
+        -44,
+        -47,
+        -34
+    );
+
+    ctx.lineTo(
+        -31,
+        -13
+    );
+
+
+    /* index */
+
+    ctx.lineTo(
+        -31,
+        -71
+    );
+
+    ctx.quadraticCurveTo(
+        -31,
+        -84,
+        -21,
+        -85
+    );
+
+    ctx.quadraticCurveTo(
+        -10,
+        -85,
+        -9,
+        -72
+    );
+
+    ctx.lineTo(
+        -8,
+        -25
+    );
+
+
+    /* middle */
+
+    ctx.lineTo(
+        -7,
+        -94
+    );
+
+    ctx.quadraticCurveTo(
+        -7,
+        -108,
+        4,
+        -108
+    );
+
+    ctx.quadraticCurveTo(
+        15,
+        -107,
+        15,
+        -94
+    );
+
+    ctx.lineTo(
+        16,
+        -26
+    );
+
+
+    /* ring */
+
+    ctx.lineTo(
+        17,
+        -82
+    );
+
+    ctx.quadraticCurveTo(
+        17,
+        -96,
+        28,
+        -96
+    );
+
+    ctx.quadraticCurveTo(
+        39,
+        -95,
+        39,
+        -82
+    );
+
+    ctx.lineTo(
+        39,
+        -25
+    );
+
+
+    /* little finger */
+
+    ctx.lineTo(
+        40,
+        -63
+    );
+
+    ctx.quadraticCurveTo(
+        40,
+        -75,
+        50,
+        -75
+    );
+
+    ctx.quadraticCurveTo(
+        61,
+        -74,
+        61,
+        -61
+    );
+
+    ctx.lineTo(
+        60,
+        12
+    );
+
+
+    /* palm bottom */
+
+    ctx.quadraticCurveTo(
+        61,
+        39,
+        42,
+        52
+    );
+
+    ctx.quadraticCurveTo(
+        3,
+        74,
+        -34,
+        42
+    );
+
+
+    ctx.closePath();
+
+
+    ctx.restore();
+
+}
+
+
+/* =========================================================
+   DRAW HAND
+========================================================= */
+
+function drawLeaf(
+    leaf,
+    selected = false
+) {
+
+    ctx.save();
+
+
+    /* shadow */
+
+    ctx.globalAlpha =
+        .16;
+
+    ctx.fillStyle =
+        "#3b372b";
+
+    createHandPath(
+        leaf.x + 4,
+        leaf.y + 7,
+        leaf.scale,
+        leaf.rotation
+    );
+
+    ctx.fill();
+
+
+    /* hand */
+
+    ctx.globalAlpha =
+        1;
+
+    ctx.fillStyle =
+        leaf.color;
+
+    createHandPath(
+        leaf.x,
+        leaf.y,
+        leaf.scale,
+        leaf.rotation
+    );
+
+    ctx.fill();
+
+
+    /* outline */
+
+    ctx.strokeStyle =
+        "rgba(63,78,61,.28)";
+
+    ctx.lineWidth =
+        2;
+
+    createHandPath(
+        leaf.x,
+        leaf.y,
+        leaf.scale,
+        leaf.rotation
+    );
+
+    ctx.stroke();
+
+
+    /* name */
+
+    ctx.save();
+
+    ctx.translate(
+        leaf.x,
+        leaf.y
+    );
+
+    ctx.rotate(
+        leaf.rotation
+    );
+
+
+    ctx.fillStyle =
+        "#26483b";
+
+    ctx.font =
+        `700 ${Math.max(
+            11,
+            14 * leaf.scale
+        )}px system-ui, "Noto Sans Thai", sans-serif`;
+
+    ctx.textAlign =
+        "center";
+
+    ctx.textBaseline =
+        "middle";
+
+
+    ctx.fillText(
+        leaf.name,
+        0,
+        17 * leaf.scale,
+        105 * leaf.scale
+    );
+
+
+    ctx.restore();
+
+
+    /* selected */
+
+    if (selected) {
+
+        ctx.strokeStyle =
+            "#ffffff";
+
+        ctx.lineWidth =
+            3;
+
+        ctx.setLineDash([
+            7,
+            5
+        ]);
+
+        ctx.beginPath();
+
+        ctx.arc(
+            leaf.x,
+            leaf.y,
+            78 * leaf.scale,
+            0,
+            Math.PI * 2
+        );
+
+        ctx.stroke();
+
+        ctx.setLineDash([]);
+
+    }
+
+
+    ctx.restore();
+
+}
+
+
+/* =========================================================
+   DRAW EVERYTHING
+========================================================= */
+
+function draw() {
+
+    ctx.clearRect(
+        0,
+        0,
+        W,
+        H
+    );
+
+    drawBackground();
+
+
+    for (
+        const leaf
+        of leaves
+    ) {
+
+        drawLeaf(
+            leaf,
+            leaf === selectedLeaf
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   GET POINTER POSITION
+========================================================= */
+
+function getPointerPosition(
+    event
+) {
+
+    const rect =
+        canvas.getBoundingClientRect();
+
+    return {
+
+        x:
+            event.clientX -
+            rect.left,
+
+        y:
+            event.clientY -
+            rect.top
+
+    };
+
+}
+
+
+/* =========================================================
+   FIND HAND UNDER FINGER
+========================================================= */
+
+function findLeaf(
+    x,
+    y
+) {
+
+    for (
+        let i = leaves.length - 1;
+        i >= 0;
+        i--
+    ) {
+
+        const leaf =
+            leaves[i];
+
+        const dx =
+            x - leaf.x;
+
+        const dy =
+            y - leaf.y;
+
+
+        const radius =
+            80 * leaf.scale;
+
+
+        if (
+            dx * dx +
+            dy * dy <
+            radius * radius
+        ) {
+
+            return leaf;
+
+        }
+
+    }
+
+
+    return null;
+
+}
+
+
+/* =========================================================
+   POINTER DOWN
+========================================================= */
+
+canvas.addEventListener(
+    "pointerdown",
+    event => {
+
+        event.preventDefault();
+
+
+        canvas.setPointerCapture(
+            event.pointerId
+        );
+
+
+        const point =
+            getPointerPosition(event);
+
+
+        pointers.set(
+            event.pointerId,
+            point
+        );
+
+
+        /* visual touch feedback */
+
+        touchIndicator.style.display =
+            "block";
+
+        touchIndicator.style.left =
+            point.x + "px";
+
+        touchIndicator.style.top =
+            point.y + "px";
+
+
+        const existingLeaf =
+            findLeaf(
+                point.x,
+                point.y
+            );
+
+
+        if (existingLeaf) {
+
+            selectedLeaf =
+                existingLeaf;
+
+
+            gesture = {
+
+                type: "drag",
+
+                leaf: existingLeaf,
+
+                offsetX:
+                    point.x -
+                    existingLeaf.x,
+
+                offsetY:
+                    point.y -
+                    existingLeaf.y
+
+            };
+
+
+            /* bring to front */
+
+            const index =
+                leaves.indexOf(
+                    existingLeaf
+                );
+
+
+            if (index >= 0) {
+
+                leaves.splice(
+                    index,
+                    1
+                );
+
+                leaves.push(
+                    existingLeaf
+                );
+
+            }
+
+        }
+
+        else {
+
+            selectedLeaf =
+                null;
+
+
+            pendingPosition = {
+
+                x: point.x,
+
+                y: point.y
+
+            };
+
+
+            gesture = null;
+
+        }
+
+
+        draw();
+
+    }
+);
+
+
+/* =========================================================
+   POINTER MOVE
+========================================================= */
+
+canvas.addEventListener(
+    "pointermove",
+    event => {
+
+        event.preventDefault();
+
+
+        if (
+            !pointers.has(
+                event.pointerId
+            )
+        ) {
+
+            return;
+
+        }
+
+
+        const point =
+            getPointerPosition(event);
+
+
+        pointers.set(
+            event.pointerId,
+            point
+        );
+
+
+        /* single finger drag */
+
+        if (
+            gesture &&
+            gesture.type === "drag" &&
+            pointers.size === 1
+        ) {
+
+            const leaf =
+                gesture.leaf;
+
+
+            leaf.x =
+                point.x -
+                gesture.offsetX;
+
+
+            leaf.y =
+                point.y -
+                gesture.offsetY;
+
+
+            draw();
+
+        }
+
+
+        /* two finger transform */
+
+        if (
+            selectedLeaf &&
+            pointers.size === 2
+        ) {
+
+            const points =
+                [...pointers.values()];
+
+
+            const p1 =
+                points[0];
+
+            const p2 =
+                points[1];
+
+
+            const distance =
+                Math.hypot(
+                    p2.x - p1.x,
+                    p2.y - p1.y
+                );
+
+
+            const angle =
+                Math.atan2(
+                    p2.y - p1.y,
+                    p2.x - p1.x
+                );
+
+
+            if (
+                !gesture ||
+                gesture.type !==
+                "transform"
+            ) {
+
+                gesture = {
+
+                    type:
+                        "transform",
+
+                    leaf:
+                        selectedLeaf,
+
+                    initialDistance:
+                        distance,
+
+                    initialAngle:
+                        angle,
+
+                    initialScale:
+                        selectedLeaf.scale,
+
+                    initialRotation:
+                        selectedLeaf.rotation
+
+                };
+
+            }
+
+
+            selectedLeaf.scale =
+                Math.max(
+                    .45,
+                    Math.min(
+                        1.4,
+                        gesture.initialScale *
+                        distance /
+                        gesture.initialDistance
+                    )
+                );
+
+
+            selectedLeaf.rotation =
+                gesture.initialRotation +
+                (
+                    angle -
+                    gesture.initialAngle
+                );
+
+
+            selectedLeaf.x =
+                (p1.x + p2.x) / 2;
+
+
+            selectedLeaf.y =
+                (p1.y + p2.y) / 2;
+
+
+            draw();
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   POINTER END
+========================================================= */
+
+function pointerEnd(
+    event
+) {
+
+    pointers.delete(
+        event.pointerId
+    );
+
+
+    if (
+        pointers.size === 0
+    ) {
+
+        touchIndicator.style.display =
+            "none";
+
+
+        if (
+            gesture &&
+            (
+                gesture.type ===
+                "drag" ||
+                gesture.type ===
+                "transform"
+            )
+        ) {
+
+            saveTree();
+
+            draw();
+
+        }
+
+        else if (
+            pendingPosition
+        ) {
+
+            modal.classList.add(
+                "show"
+            );
+
+
+            nameInput.value =
+                "";
+
+
+            setTimeout(
+                () => {
+
+                    nameInput.focus();
+
+                },
+                80
+            );
+
+        }
+
+
+        pendingPosition =
+            null;
+
+        gesture =
+            null;
+
+    }
+
+}
+
+
+canvas.addEventListener(
+    "pointerup",
+    pointerEnd
+);
+
+canvas.addEventListener(
+    "pointercancel",
+    pointerEnd
+);
+
+
+/* =========================================================
+   ADD NEW HAND
+========================================================= */
+
+nameForm.addEventListener(
+    "submit",
+    event => {
+
+        event.preventDefault();
+
+
+        const name =
+            nameInput.value.trim();
+
+
+        if (!name) {
+
+            return;
+
+        }
+
+
+        const scale =
+            Math.min(
+                W,
+                H
+            ) / 720;
+
+
+        const newLeaf = {
+
+            id:
+                Date.now() +
+                Math.random(),
+
+            name:
+
+                name,
+
+            color:
+
+                COLORS[
+                    Math.floor(
+                        Math.random() *
+                        COLORS.length
+                    )
+                ],
+
+            x:
+
+                pendingPosition?.x ??
+                W / 2,
+
+            y:
+
+                pendingPosition?.y ??
+                H / 2,
+
+            scale:
+
+                scale,
+
+            rotation:
+
+                (Math.random() - .5) *
+                .35
+
+        };
+
+
+        leaves.push(
+            newLeaf
+        );
+
+
+        selectedLeaf =
+            newLeaf;
+
+
+        saveTree();
+
+
+        modal.classList.remove(
+            "show"
+        );
+
+
+        pendingPosition =
+            null;
+
+
+        draw();
+
+
+        showToast(
+            "เพิ่มมือของ " +
+            name +
+            " แล้ว! 🌿"
+        );
+
+    }
+);
+
+
+/* =========================================================
+   CANCEL MODAL
+========================================================= */
+
+document
+    .getElementById(
+        "cancelButton"
+    )
+    .addEventListener(
+        "click",
+        () => {
+
+            modal.classList.remove(
+                "show"
+            );
+
+            pendingPosition =
+                null;
+
+        }
+    );
+
+
+/* =========================================================
+   CLOSE MODAL BY CLICKING OUTSIDE
+========================================================= */
+
+modal.addEventListener(
+    "pointerdown",
+    event => {
+
+        if (
+            event.target === modal
+        ) {
+
+            modal.classList.remove(
+                "show"
+            );
+
+            pendingPosition =
+                null;
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   TEACHER PANEL
+========================================================= */
+
+teacherButton.addEventListener(
+    "click",
+    () => {
+
+        teacherPanel.classList.toggle(
+            "show"
+        );
+
+    }
+);
+
+
+document
+    .getElementById(
+        "closeTeacherButton"
+    )
+    .addEventListener(
+        "click",
+        () => {
+
+            teacherPanel.classList.remove(
+                "show"
+            );
+
+        }
+    );
+
+
+/* =========================================================
+   CLEAR TREE
+========================================================= */
+
+document
+    .getElementById(
+        "clearButton"
+    )
+    .addEventListener(
+        "click",
+        () => {
+
+            const confirmation =
+                prompt(
+                    "พิมพ์ CLEAR เพื่อยืนยันการล้างต้นไม้"
+                );
+
+
+            if (
+                confirmation ===
+                "CLEAR"
+            ) {
+
+                leaves = [];
+
+                selectedLeaf =
+                    null;
+
+                saveTree();
+
+                draw();
+
+                teacherPanel.classList.remove(
+                    "show"
+                );
+
+                showToast(
+                    "ล้างต้นไม้แล้ว 🌱"
+                );
+
+            }
+
+        }
+    );
+
+
+/* =========================================================
+   EXPORT PNG
+========================================================= */
+
+document
+    .getElementById(
+        "exportButton"
+    )
+    .addEventListener(
+        "click",
+        () => {
+
+            const previous =
+                selectedLeaf;
+
+
+            selectedLeaf =
+                null;
+
+
+            draw();
+
+
+            const exportCanvas =
+                document.createElement(
+                    "canvas"
+                );
+
+
+            exportCanvas.width =
+                W * DPR;
+
+
+            exportCanvas.height =
+                H * DPR;
+
+
+            const exportContext =
+                exportCanvas.getContext(
+                    "2d"
+                );
+
+
+            exportContext.drawImage(
+                canvas,
+                0,
+                0
+            );
+
+
+            selectedLeaf =
+                previous;
+
+
+            draw();
+
+
+            const link =
+                document.createElement(
+                    "a"
+                );
+
+
+            link.download =
+                "our-class-tree.png";
+
+
+            link.href =
+                exportCanvas.toDataURL(
+                    "image/png"
+                );
+
+
+            link.click();
+
+
+            showToast(
+                "บันทึกภาพต้นไม้แล้ว 📸"
+            );
+
+        }
+    );
+
+
+/* =========================================================
+   TOAST
+========================================================= */
+
+let toastTimer;
+
+function showToast(
+    message
+) {
+
+    toast.textContent =
+        message;
+
+
+    toast.classList.add(
+        "show"
+    );
+
+
+    clearTimeout(
+        toastTimer
+    );
+
+
+    toastTimer =
+        setTimeout(
+            () => {
+
+                toast.classList.remove(
+                    "show"
+                );
+
+            },
+            2200
+        );
+
+}
+
+
+/* =========================================================
+   START
+========================================================= */
+
+updateCounter();
+
+resizeCanvas();
+
+</script>
+
+</body>
+</html>
