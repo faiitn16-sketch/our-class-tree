@@ -1211,7 +1211,7 @@ function drawHandGuide() {
     }
 
     const size =
-        Math.min(W, H) * 0.28;
+        Math.min(W, H) * 0.65;
 
     const ratio =
         handGuideImage.height /
@@ -1225,19 +1225,15 @@ function drawHandGuide() {
 
     ctx.save();
 
-    ctx.globalAlpha = 0.75;
-
-    ctx.filter = "brightness(0) invert(1)";
+    ctx.globalAlpha = 0.45;
 
     ctx.drawImage(
-    handGuideImage,
-    x - width / 2,
-    y - height / 2,
-    width,
-    height
-);
-
-    ctx.filter = "none";
+        handGuideImage,
+        x - width / 2,
+        y - height / 2,
+        width,
+        height
+    );
 
     ctx.restore();
 }
@@ -1250,7 +1246,7 @@ function createAnimatedLeaves() {
 
     animatedLeaves = [];
 
-    const count = 35;
+    const count = 75;
 
     for (let i = 0; i < count; i++) {
 
@@ -1267,7 +1263,7 @@ function createAnimatedLeaves() {
 
         const y =
             H * (
-                0.08 +
+                0.18 +
                 Math.random() * 0.48
             );
 
@@ -1286,12 +1282,12 @@ function createAnimatedLeaves() {
                 Math.PI * 2,
 
             speed:
-                0.0008 +
-                Math.random() * 0.0015,
+                0.002 +
+                Math.random() * 0.003,
 
             swing:
-                0.04 +
-                Math.random() * 0.08,
+                0.10 +
+                Math.random() * 0.15,
 
             phase:
                 Math.random() *
@@ -1307,8 +1303,7 @@ function drawAnimatedLeaves() {
 
 function animate() {
 
-    animationTime =
-        performance.now();
+    animationTime += 0.05;
 
     draw();
 
