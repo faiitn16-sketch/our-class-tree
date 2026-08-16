@@ -796,11 +796,9 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 
-const treeRef =
-    window.firebaseRef(
-        window.firebaseDatabase,
-        "ourClassTree"
-    );
+const database = firebase.database();
+
+const treeRef = database.ref("ourClassTree");
 
 console.log("Firebase connected!");
 
@@ -867,44 +865,28 @@ const COLORS = [
 
 let leaves = [];
 
-
-/* =========================================================
-   FIREBASE REALTIME DATABASE
-========================================================= */
-
-const treeRef =
-    window.firebaseRef(
-        window.firebaseDatabase,
-        "ourClassTree"
-    );
-
-
 /* รับข้อมูลจาก Firebase แบบเรียลไทม์ */
 
-window.firebaseOnValue(
-    treeRef,
-    (snapshot) => {
+treeRef.on("value", (snapshot) => {
 
-        const data =
-            snapshot.val();
+    const data = snapshot.val();
 
-        if (data) {
+    if (data) {
 
-            leaves =
-                Object.values(data);
+        leaves = Object.values(data);
 
-        } else {
+    } else {
 
-            leaves = [];
-
-        }
-
-        updateCounter();
-
-        draw();
+        leaves = [];
 
     }
-);
+
+    updateCounter();
+
+    draw();
+
+});
+      
 let selectedLeaf = null;
 
 let pendingPosition = null;
@@ -976,20 +958,14 @@ function saveTree() {
 
     const data = {};
 
+    leaves.forEach(leaf => {
 
-    leaves.forEach(
-        leaf => {
+        data[leaf.id] = leaf;
 
-            data[leaf.id] =
-                leaf;
+    });
 
-        }
-    );
+    treeRef.set(data);
 
-   window.firebaseSet(
-    treeRef,
-    data
-   );
     updateCounter();
 
 }
@@ -1470,18 +1446,6 @@ function createAnimatedLeaves() {
 
 function drawAnimatedLeaves() {
 
-function animate() {
-
-    animationTime += 0.05;
-
-    draw();
-
-    requestAnimationFrame(
-        animate
-    );
-
-}
-      
     if (
         !leafImage.complete ||
         !leafImage.naturalWidth
@@ -1494,10 +1458,6 @@ function animate() {
     for (
         const leaf of animatedLeaves
     ) {
-
-        /*
-         * การไหวของใบไม้
-         */
 
         const sway =
             Math.sin(
@@ -1523,8 +1483,7 @@ function animate() {
         );
 
         ctx.rotate(
-            leaf.rotation +
-            sway
+            leaf.rotation + sway
         );
 
         ctx.globalAlpha = 0.9;
@@ -1542,6 +1501,16 @@ function animate() {
     }
 
     ctx.restore();
+
+}
+
+function animate() {
+
+    animationTime += 1;
+
+    draw();
+
+    requestAnimationFrame(animate);
 
 }
       
