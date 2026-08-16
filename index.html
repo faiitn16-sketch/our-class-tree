@@ -762,6 +762,10 @@ let holdTimer = null;
 
 let holdStart = null;
 
+let animatedLeaves = [];
+
+let animationTime = 0;
+
 let W = 0;
 
 let H = 0;
@@ -791,8 +795,8 @@ treeImage.src = "tree.png";
 const handImage = new Image();
 handImage.src = "hand.png";
 
-
-/* รอให้รูปโหลดเสร็จแล้ววาดใหม่ */
+const leafImage = new Image();
+leafImage.src = "leaf.png";
 
 treeImage.onload = () => {
     draw();
@@ -801,7 +805,11 @@ treeImage.onload = () => {
 handImage.onload = () => {
     draw();
 };
-      
+
+leafImage.onload = () => {
+    createAnimatedLeaves();
+    draw();
+};      
 
 /* =========================================================
    LOCAL STORAGE
@@ -1233,6 +1241,145 @@ function drawHandGuide() {
 
     ctx.restore();
 }
+
+/* =========================================================
+   ANIMATED LEAVES
+========================================================= */
+
+function createAnimatedLeaves() {
+
+    animatedLeaves = [];
+
+    const count = 35;
+
+    for (let i = 0; i < count; i++) {
+
+        /*
+         * ตำแหน่งของใบไม้
+         * ปรับบริเวณนี้ให้ตรงกับต้นไม้ของคุณได้
+         */
+
+        const x =
+            W * (
+                0.18 +
+                Math.random() * 0.64
+            );
+
+        const y =
+            H * (
+                0.08 +
+                Math.random() * 0.48
+            );
+
+        animatedLeaves.push({
+
+            x: x,
+
+            y: y,
+
+            size:
+                20 +
+                Math.random() * 25,
+
+            rotation:
+                Math.random() *
+                Math.PI * 2,
+
+            speed:
+                0.0008 +
+                Math.random() * 0.0015,
+
+            swing:
+                0.04 +
+                Math.random() * 0.08,
+
+            phase:
+                Math.random() *
+                Math.PI * 2
+
+        });
+
+    }
+
+}
+
+function drawAnimatedLeaves() {
+
+function animate() {
+
+    animationTime =
+        performance.now();
+
+    draw();
+
+    requestAnimationFrame(
+        animate
+    );
+
+}
+      
+    if (
+        !leafImage.complete ||
+        !leafImage.naturalWidth
+    ) {
+        return;
+    }
+
+    ctx.save();
+
+    for (
+        const leaf of animatedLeaves
+    ) {
+
+        /*
+         * การไหวของใบไม้
+         */
+
+        const sway =
+            Math.sin(
+                animationTime *
+                leaf.speed +
+                leaf.phase
+            ) *
+            leaf.swing;
+
+        const swayY =
+            Math.cos(
+                animationTime *
+                leaf.speed * 0.7 +
+                leaf.phase
+            ) *
+            2;
+
+        ctx.save();
+
+        ctx.translate(
+            leaf.x,
+            leaf.y + swayY
+        );
+
+        ctx.rotate(
+            leaf.rotation +
+            sway
+        );
+
+        ctx.globalAlpha = 0.9;
+
+        ctx.drawImage(
+            leafImage,
+            -leaf.size / 2,
+            -leaf.size / 2,
+            leaf.size,
+            leaf.size
+        );
+
+        ctx.restore();
+
+    }
+
+    ctx.restore();
+
+}
       
 function draw() {
 
@@ -1243,9 +1390,19 @@ function draw() {
         H
     );
 
+    /* ต้นไม้ */
+
     drawBackground();
-    
+
+    /* ใบไม้ที่ไหว */
+
+    drawAnimatedLeaves();
+
+    /* รอยมือสำหรับให้เด็กวาง */
+
     drawHandGuide();
+
+    /* มือของเด็ก */
 
     for (
         const leaf
@@ -1253,14 +1410,13 @@ function draw() {
     ) {
 
         drawHandImage(
-    leaf,
-    leaf === selectedLeaf
-    );
+            leaf,
+            leaf === selectedLeaf
+        );
 
     }
 
 }
-
 
 /* =========================================================
    GET POINTER POSITION
@@ -2057,6 +2213,10 @@ updateCounter();
 
 resizeCanvas();
 
+createAnimatedLeaves();
+
+animate();
+      
 </script>
 
 </body>
