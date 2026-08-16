@@ -829,18 +829,12 @@ body {
 
     /* ทำให้โค้ดส่วนอื่นของเว็บเรียกใช้ได้ */
 
-    window.firebaseDatabase =
-        database;
-
-    window.firebaseRef =
-        ref;
-
-    window.firebaseSet =
-        set;
-
-    window.firebaseOnValue =
-        onValue;
-
+   window.firebaseAPI = {
+    database: database,
+    ref: ref,
+    set: set,
+    onValue: onValue
+};
 
     console.log(
         "Firebase connected!"
@@ -913,18 +907,17 @@ const COLORS = [
 let leaves = [];
 
 const treeRef =
-    window.firebaseRef(
-        window.firebaseDatabase,
+    window.firebaseAPI.ref(
+        window.firebaseAPI.database,
         "ourClassTree"
     );
 
 
 /* รับข้อมูลจาก Firebase แบบเรียลไทม์ */
 
-window.firebaseOnValue(
+window.firebaseAPI.onValue(
     treeRef,
     snapshot => {
-
         const data =
             snapshot.val();
 
@@ -1028,10 +1021,10 @@ function saveTree() {
     );
 
 
-    window.firebaseSet(
-        treeRef,
-        data
-    );
+    window.firebaseAPI.set(
+    treeRef,
+    data
+);
 
 
     updateCounter();
