@@ -1203,7 +1203,7 @@ function drawHandGuide() {
     }
 
     const size =
-        Math.min(W, H) * 0.40;
+        Math.min(W, H) * 0.50;
 
     const ratio =
         handGuideImage.height /
@@ -1217,7 +1217,7 @@ function drawHandGuide() {
 
     ctx.save();
 
-    ctx.globalAlpha = 0.45;
+    ctx.globalAlpha = 0.75;
 
     ctx.drawImage(
         handGuideImage,
