@@ -796,14 +796,13 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 
-const database =
-    firebase.database();
-
 const treeRef =
-    database.ref("ourClassTree");
+    window.firebaseRef(
+        window.firebaseDatabase,
+        "ourClassTree"
+    );
 
 console.log("Firebase connected!");
-<script>
 
 /* =========================================================
    ELEMENTS
