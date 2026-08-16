@@ -769,11 +769,18 @@ let H = 0;
 let DPR = 1;
 
 const handGuideImage = new Image();
-handGuideImage.src = "handguide.png";
+
+handGuideImage.src = "./handguide.png";
 
 handGuideImage.onload = () => {
+    console.log("โหลด handguide.png สำเร็จ");
     draw();
 };
+
+handGuideImage.onerror = () => {
+    console.error("ไม่สามารถโหลด handguide.png ได้");
+};
+
 /* =========================================================
    IMAGES
 ========================================================= */
