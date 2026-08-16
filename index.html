@@ -779,68 +779,30 @@ body {
 
 </div>
 
-<!-- Firebase -->
-<script type="module">
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
-    import { initializeApp }
-        from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+<script>
 
-    import {
-        getDatabase,
-        ref,
-        set,
-        onValue
-    }
-        from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
-
-
-    const firebaseConfig = {
-
-        apiKey: "AIzaSyCoqXj41sxtaRszOH9TbenwFlVjUHgwiAA",
-
-        authDomain:
-            "our-class-tree-ef0e9.firebaseapp.com",
-
-        databaseURL:
-            "https://our-class-tree-ef0e9-default-rtdb.firebaseio.com",
-
-        projectId:
-            "our-class-tree-ef0e9",
-
-        storageBucket:
-            "our-class-tree-ef0e9.firebasestorage.app",
-
-        messagingSenderId:
-            "401725741242",
-
-        appId:
-            "1:401725741242:web:8b416b2492b1328c4e0a83"
-
-    };
-
-
-    const firebaseApp =
-        initializeApp(firebaseConfig);
-
-
-    const database =
-        getDatabase(firebaseApp);
-
-
-    /* ทำให้โค้ดส่วนอื่นของเว็บเรียกใช้ได้ */
-
-   window.firebaseAPI = {
-    database: database,
-    ref: ref,
-    set: set,
-    onValue: onValue
+const firebaseConfig = {
+    apiKey: "AIzaSyCoqXj41sxtaRszOH9TbenwFlVjUHgwiAA",
+    authDomain: "our-class-tree-ef0e9.firebaseapp.com",
+    databaseURL: "https://our-class-tree-ef0e9-default-rtdb.firebaseio.com",
+    projectId: "our-class-tree-ef0e9",
+    storageBucket: "our-class-tree-ef0e9.firebasestorage.app",
+    messagingSenderId: "401725741242",
+    appId: "1:401725741242:web:8b416b2492b1328c4e0a83"
 };
 
-    console.log(
-        "Firebase connected!"
-    );
+firebase.initializeApp(firebaseConfig);
 
-</script>
+const database =
+    firebase.database();
+
+const treeRef =
+    database.ref("ourClassTree");
+
+console.log("Firebase connected!");
 <script>
 
 /* =========================================================
@@ -915,9 +877,7 @@ const treeRef =
 
 /* รับข้อมูลจาก Firebase แบบเรียลไทม์ */
 
-window.firebaseAPI.onValue(
-    treeRef,
-    snapshot => {
+treeRef.on("value", snapshot => {
         const data =
             snapshot.val();
 
@@ -1020,12 +980,7 @@ function saveTree() {
         }
     );
 
-
-    window.firebaseAPI.set(
-    treeRef,
-    data
-);
-
+    treeRef.set(data);
 
     updateCounter();
 
