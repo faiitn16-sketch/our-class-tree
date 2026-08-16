@@ -763,7 +763,28 @@ let W = 0;
 let H = 0;
 
 let DPR = 1;
+      
+/* =========================================================
+   IMAGES
+========================================================= */
 
+const treeImage = new Image();
+treeImage.src = "tree.png";
+
+const handImage = new Image();
+handImage.src = "hand.png";
+
+
+/* รอให้รูปโหลดเสร็จแล้ววาดใหม่ */
+
+treeImage.onload = () => {
+    draw();
+};
+
+handImage.onload = () => {
+    draw();
+};
+      
 
 /* =========================================================
    LOCAL STORAGE
@@ -838,35 +859,15 @@ window.addEventListener(
    BACKGROUND
 ========================================================= */
 
+/* =========================================================
+   BACKGROUND IMAGE
+========================================================= */
+
 function drawBackground() {
 
-    /* sky */
+    /* พื้นหลังสำรอง */
 
-    const gradient =
-        ctx.createLinearGradient(
-            0,
-            0,
-            0,
-            H
-        );
-
-    gradient.addColorStop(
-        0,
-        "#dff2e4"
-    );
-
-    gradient.addColorStop(
-        0.5,
-        "#f7efd8"
-    );
-
-    gradient.addColorStop(
-        1,
-        "#efd8b3"
-    );
-
-    ctx.fillStyle =
-        gradient;
+    ctx.fillStyle = "#f7ecd4";
 
     ctx.fillRect(
         0,
@@ -876,519 +877,171 @@ function drawBackground() {
     );
 
 
-    /* sun */
+    /* ถ้ายังโหลดรูปไม่เสร็จ ให้ใช้พื้นหลังสำรอง */
 
-    const sun =
-        ctx.createRadialGradient(
-            W * .78,
-            H * .16,
-            10,
-            W * .78,
-            H * .16,
-            Math.min(W,H) * .25
-        );
-
-    sun.addColorStop(
-        0,
-        "rgba(255,244,175,.65)"
-    );
-
-    sun.addColorStop(
-        1,
-        "rgba(255,244,175,0)"
-    );
-
-    ctx.fillStyle =
-        sun;
-
-    ctx.fillRect(
-        0,
-        0,
-        W,
-        H
-    );
+    if (!treeImage.complete) {
+        return;
+    }
 
 
-    /* ground */
+    /* ทำให้รูปเต็มหน้าจอแบบ cover */
 
-    ctx.fillStyle =
-        "#b9cf91";
+    const imageRatio =
+        treeImage.width /
+        treeImage.height;
 
-    ctx.beginPath();
-
-    ctx.ellipse(
-        W * .5,
-        H * 1.05,
-        W * .72,
-        H * .17,
-        0,
-        0,
-        Math.PI * 2
-    );
-
-    ctx.fill();
+    const screenRatio =
+        W / H;
 
 
-    ctx.fillStyle =
-        "#d7e1aa";
-
-    ctx.beginPath();
-
-    ctx.ellipse(
-        W * .5,
-        H * 1.02,
-        W * .52,
-        H * .10,
-        0,
-        0,
-        Math.PI * 2
-    );
-
-    ctx.fill();
+    let drawWidth;
+    let drawHeight;
+    let offsetX;
+    let offsetY;
 
 
-    /* tree */
+    if (imageRatio > screenRatio) {
 
-    ctx.save();
+        drawHeight = H;
 
-    ctx.lineCap =
-        "round";
+        drawWidth =
+            H * imageRatio;
 
-    ctx.lineJoin =
-        "round";
+        offsetX =
+            (W - drawWidth) / 2;
 
+        offsetY = 0;
 
-    const trunkX =
-        W * .50;
+    } else {
 
+        drawWidth = W;
 
-    ctx.strokeStyle =
-        "#6b4a2f";
+        drawHeight =
+            W / imageRatio;
 
-    ctx.lineWidth =
-        Math.max(
-            22,
-            W * .035
-        );
+        offsetX = 0;
 
-
-    ctx.beginPath();
-
-    ctx.moveTo(
-        trunkX,
-        H + 20
-    );
-
-    ctx.quadraticCurveTo(
-        W * .47,
-        H * .68,
-        W * .49,
-        H * .49
-    );
-
-    ctx.stroke();
-
-
-    ctx.lineWidth =
-        Math.max(
-            13,
-            W * .022
-        );
-
-
-    const branches = [
-
-        [
-            trunkX,
-            H * .62,
-            W * .22,
-            H * .30
-        ],
-
-        [
-            trunkX,
-            H * .57,
-            W * .75,
-            H * .28
-        ],
-
-        [
-            trunkX,
-            H * .49,
-            W * .33,
-            H * .17
-        ],
-
-        [
-            trunkX,
-            H * .46,
-            W * .64,
-            H * .12
-        ],
-
-        [
-            W * .25,
-            H * .30,
-            W * .11,
-            H * .17
-        ],
-
-        [
-            W * .75,
-            H * .28,
-            W * .87,
-            H * .14
-        ],
-
-        [
-            W * .33,
-            H * .17,
-            W * .23,
-            H * .08
-        ],
-
-        [
-            W * .64,
-            H * .12,
-            W * .73,
-            H * .05
-        ]
-
-    ];
-
-
-    for (
-        const branch
-        of branches
-    ) {
-
-        const [
-            x1,
-            y1,
-            x2,
-            y2
-        ] = branch;
-
-
-        ctx.beginPath();
-
-        ctx.moveTo(
-            x1,
-            y1
-        );
-
-        ctx.quadraticCurveTo(
-            (x1 + x2) / 2,
-            y1 - 25,
-            x2,
-            y2
-        );
-
-        ctx.stroke();
+        offsetY =
+            (H - drawHeight) / 2;
 
     }
 
 
-    ctx.restore();
+    ctx.drawImage(
+        treeImage,
+        offsetX,
+        offsetY,
+        drawWidth,
+        drawHeight
+    );
 
 }
-
-
+      
 /* =========================================================
    HAND SHAPE
 ========================================================= */
 
-function createHandPath(
-    x,
-    y,
-    scale,
-    rotation
-) {
-
-    ctx.save();
-
-    ctx.translate(
-        x,
-        y
-    );
-
-    ctx.rotate(
-        rotation
-    );
-
-    ctx.scale(
-        scale,
-        scale
-    );
-
-
-    ctx.beginPath();
-
-
-    /* palm */
-
-    ctx.moveTo(
-        -34,
-        42
-    );
-
-    ctx.quadraticCurveTo(
-        -47,
-        22,
-        -39,
-        0
-    );
-
-
-    /* thumb */
-
-    ctx.quadraticCurveTo(
-        -69,
-        -7,
-        -72,
-        -25
-    );
-
-    ctx.quadraticCurveTo(
-        -73,
-        -37,
-        -64,
-        -41
-    );
-
-    ctx.quadraticCurveTo(
-        -54,
-        -44,
-        -47,
-        -34
-    );
-
-    ctx.lineTo(
-        -31,
-        -13
-    );
-
-
-    /* index */
-
-    ctx.lineTo(
-        -31,
-        -71
-    );
-
-    ctx.quadraticCurveTo(
-        -31,
-        -84,
-        -21,
-        -85
-    );
-
-    ctx.quadraticCurveTo(
-        -10,
-        -85,
-        -9,
-        -72
-    );
-
-    ctx.lineTo(
-        -8,
-        -25
-    );
-
-
-    /* middle */
-
-    ctx.lineTo(
-        -7,
-        -94
-    );
-
-    ctx.quadraticCurveTo(
-        -7,
-        -108,
-        4,
-        -108
-    );
-
-    ctx.quadraticCurveTo(
-        15,
-        -107,
-        15,
-        -94
-    );
-
-    ctx.lineTo(
-        16,
-        -26
-    );
-
-
-    /* ring */
-
-    ctx.lineTo(
-        17,
-        -82
-    );
-
-    ctx.quadraticCurveTo(
-        17,
-        -96,
-        28,
-        -96
-    );
-
-    ctx.quadraticCurveTo(
-        39,
-        -95,
-        39,
-        -82
-    );
-
-    ctx.lineTo(
-        39,
-        -25
-    );
-
-
-    /* little finger */
-
-    ctx.lineTo(
-        40,
-        -63
-    );
-
-    ctx.quadraticCurveTo(
-        40,
-        -75,
-        50,
-        -75
-    );
-
-    ctx.quadraticCurveTo(
-        61,
-        -74,
-        61,
-        -61
-    );
-
-    ctx.lineTo(
-        60,
-        12
-    );
-
-
-    /* palm bottom */
-
-    ctx.quadraticCurveTo(
-        61,
-        39,
-        42,
-        52
-    );
-
-    ctx.quadraticCurveTo(
-        3,
-        74,
-        -34,
-        42
-    );
-
-
-    ctx.closePath();
-
-
-    ctx.restore();
-
-}
-
-
 /* =========================================================
-   DRAW HAND
+   DRAW HAND IMAGE
 ========================================================= */
 
-function drawLeaf(
+function drawHandImage(
     leaf,
     selected = false
 ) {
 
+    if (
+        !handImage.complete ||
+        !handImage.naturalWidth
+    ) {
+        return;
+    }
+
+
     ctx.save();
 
 
-    /* shadow */
+    /* ขนาดรอยมือ */
 
-    ctx.globalAlpha =
-        .16;
+    const baseSize = 170;
 
-    ctx.fillStyle =
-        "#3b372b";
+    const width =
+        baseSize * leaf.scale;
 
-    createHandPath(
-        leaf.x + 4,
-        leaf.y + 7,
-        leaf.scale,
-        leaf.rotation
-    );
-
-    ctx.fill();
+    const height =
+        baseSize *
+        (
+            handImage.height /
+            handImage.width
+        ) *
+        leaf.scale;
 
 
-    /* hand */
-
-    ctx.globalAlpha =
-        1;
-
-    ctx.fillStyle =
-        leaf.color;
-
-    createHandPath(
-        leaf.x,
-        leaf.y,
-        leaf.scale,
-        leaf.rotation
-    );
-
-    ctx.fill();
-
-
-    /* outline */
-
-    ctx.strokeStyle =
-        "rgba(63,78,61,.28)";
-
-    ctx.lineWidth =
-        2;
-
-    createHandPath(
-        leaf.x,
-        leaf.y,
-        leaf.scale,
-        leaf.rotation
-    );
-
-    ctx.stroke();
-
-
-    /* name */
-
-    ctx.save();
+    /* ตำแหน่ง */
 
     ctx.translate(
         leaf.x,
         leaf.y
     );
 
+
     ctx.rotate(
         leaf.rotation
     );
 
+
+    /* -----------------------------------------------------
+       SHADOW
+    ----------------------------------------------------- */
+
+    ctx.save();
+
+    ctx.globalAlpha = .18;
+
+    ctx.filter =
+        "brightness(0)";
+
+    ctx.drawImage(
+        handImage,
+        -width / 2 + 5,
+        -height / 2 + 7,
+        width,
+        height
+    );
+
+    ctx.restore();
+
+
+    /* -----------------------------------------------------
+       COLORED HAND
+    ----------------------------------------------------- */
+
+    const coloredHand =
+        createColoredHand(
+            leaf.color
+        );
+
+
+    ctx.drawImage(
+        coloredHand,
+        -width / 2,
+        -height / 2,
+        width,
+        height
+    );
+
+
+    /* -----------------------------------------------------
+       NAME
+    ----------------------------------------------------- */
 
     ctx.fillStyle =
         "#26483b";
 
     ctx.font =
         `700 ${Math.max(
-            11,
-            14 * leaf.scale
+            12,
+            15 * leaf.scale
         )}px system-ui, "Noto Sans Thai", sans-serif`;
 
     ctx.textAlign =
@@ -1401,35 +1054,36 @@ function drawLeaf(
     ctx.fillText(
         leaf.name,
         0,
-        17 * leaf.scale,
-        105 * leaf.scale
+        height * .30
     );
 
 
-    ctx.restore();
-
-
-    /* selected */
+    /* -----------------------------------------------------
+       SELECTED
+    ----------------------------------------------------- */
 
     if (selected) {
 
         ctx.strokeStyle =
             "#ffffff";
 
-        ctx.lineWidth =
-            3;
+        ctx.lineWidth = 3;
 
         ctx.setLineDash([
             7,
             5
         ]);
 
+
         ctx.beginPath();
 
         ctx.arc(
-            leaf.x,
-            leaf.y,
-            78 * leaf.scale,
+            0,
+            0,
+            Math.max(
+                width,
+                height
+            ) * .55,
             0,
             Math.PI * 2
         );
@@ -1445,6 +1099,78 @@ function drawLeaf(
 
 }
 
+/* =========================================================
+   COLOR HAND IMAGE
+========================================================= */
+
+const handColorCache = {};
+
+
+function createColoredHand(color) {
+
+    if (handColorCache[color]) {
+
+        return handColorCache[color];
+
+    }
+
+
+    const offscreen =
+        document.createElement(
+            "canvas"
+        );
+
+
+    offscreen.width =
+        handImage.naturalWidth;
+
+    offscreen.height =
+        handImage.naturalHeight;
+
+
+    const offCtx =
+        offscreen.getContext(
+            "2d"
+        );
+
+
+    /* วาดสี */
+
+    offCtx.fillStyle =
+        color;
+
+    offCtx.fillRect(
+        0,
+        0,
+        offscreen.width,
+        offscreen.height
+    );
+
+
+    /* ใช้รูปมือเป็น mask */
+
+    offCtx.globalCompositeOperation =
+        "destination-in";
+
+
+    offCtx.drawImage(
+        handImage,
+        0,
+        0
+    );
+
+
+    offCtx.globalCompositeOperation =
+        "source-over";
+
+
+    handColorCache[color] =
+        offscreen;
+
+
+    return offscreen;
+
+}
 
 /* =========================================================
    DRAW EVERYTHING
@@ -1467,10 +1193,10 @@ function draw() {
         of leaves
     ) {
 
-        drawLeaf(
-            leaf,
-            leaf === selectedLeaf
-        );
+        drawHandImage(
+    leaf,
+    leaf === selectedLeaf
+    );
 
     }
 
@@ -1529,7 +1255,7 @@ function findLeaf(
 
 
         const radius =
-            80 * leaf.scale;
+            95 * leaf.scale;
 
 
         if (
