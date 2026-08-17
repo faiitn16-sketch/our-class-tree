@@ -984,9 +984,26 @@ function saveTree() {
 
     const data = {};
 
-    leaves.forEach(leaf => {
+    leaves.forEach((leaf, index) => {
 
-        data[leaf.id] = leaf;
+        let safeId = String(leaf.id)
+            .replace(/[.#$\/\[\]]/g, "_");
+
+        /* ถ้า id เดิมมีปัญหา ให้สร้าง id ใหม่ */
+
+        if (!safeId) {
+
+            safeId =
+                Date.now().toString() +
+                "_" +
+                index;
+
+        }
+
+        data[safeId] = {
+            ...leaf,
+            id: safeId
+        };
 
     });
 
@@ -2110,37 +2127,39 @@ nameForm.addEventListener("submit", event => {
 
     const newLeaf = {
 
-        id:
-            Date.now() +
-            Math.random(),
+    id:
+        Date.now().toString() +
+        "_" +
+        Math.random()
+            .toString(36)
+            .substring(2, 8),
 
-        name:
-            name,
+    name:
+        name,
 
-        color:
-            COLORS[
-                Math.floor(
-                    Math.random() *
-                    COLORS.length
-                )
-            ],
+    color:
+        COLORS[
+            Math.floor(
+                Math.random() *
+                COLORS.length
+            )
+        ],
 
-        x:
-            pendingPosition?.x ??
-            W / 2,
+    x:
+        pendingPosition?.x ??
+        W / 2,
 
-        y:
-            pendingPosition?.y ??
-            H / 2,
+    y:
+        pendingPosition?.y ??
+        H / 2,
 
-        scale:
-            scale,
+    scale:
+        scale,
 
-        rotation:
-            (Math.random() - 0.5) * 0.35
+    rotation:
+        (Math.random() - 0.5) * 0.35
 
-    };
-
+};
     /* เพิ่มมือ */
 
     leaves.push(newLeaf);
