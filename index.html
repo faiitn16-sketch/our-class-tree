@@ -759,10 +759,8 @@ body {
         </button>
 
         <small>
-
-            ข้อมูลมือจะถูกเก็บไว้ใน LocalStorage
-            ของเครื่องนี้
-
+    ข้อมูลมือจะถูกเก็บไว้ใน Firebase
+    และแสดงร่วมกันทุกเครื่อง
         </small>
 
     </div>
@@ -929,13 +927,41 @@ handGuideImage.onerror = () => {
 ========================================================= */
 
 const treeImage = new Image();
-treeImage.src = "tree.png";
+treeImage.src = "./tree.png";
 
 const handImage = new Image();
-handImage.src = "hand.png";
+handImage.src = "./hand.png";
 
 const leafImage = new Image();
-leafImage.src = "leaf.png";
+leafImage.src = "./leaf.png";
+
+treeImage.onload = () => {
+    console.log("✅ tree.png โหลดสำเร็จ");
+    draw();
+};
+
+treeImage.onerror = () => {
+    console.error("❌ หา tree.png ไม่เจอ");
+};
+
+handImage.onload = () => {
+    console.log("✅ hand.png โหลดสำเร็จ");
+    draw();
+};
+
+handImage.onerror = () => {
+    console.error("❌ หา hand.png ไม่เจอ");
+};
+
+leafImage.onload = () => {
+    console.log("✅ leaf.png โหลดสำเร็จ");
+    createAnimatedLeaves();
+    draw();
+};
+
+leafImage.onerror = () => {
+    console.error("❌ หา leaf.png ไม่เจอ");
+};
 
 treeImage.onload = () => {
     draw();
