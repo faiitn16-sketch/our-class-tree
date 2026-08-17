@@ -2095,106 +2095,93 @@ canvas.addEventListener(
    ADD NEW HAND
 ========================================================= */
 
-nameForm.addEventListener(
-    "submit",
-    event => {
+nameForm.addEventListener("submit", event => {
 
-        event.preventDefault();
+    event.preventDefault();
 
+    const name = nameInput.value.trim();
 
-        const name =
-            nameInput.value.trim();
-
-
-        if (!name) {
-
-            return;
-
-        }
-
-
-        const scale =
-            Math.min(
-                W,
-                H
-            ) / 720;
-
-
-        const newLeaf = {
-
-            id:
-                Date.now() +
-                Math.random(),
-
-            name:
-
-                name,
-
-            color:
-
-                COLORS[
-                    Math.floor(
-                        Math.random() *
-                        COLORS.length
-                    )
-                ],
-
-            x:
-
-                pendingPosition?.x ??
-                W / 2,
-
-            y:
-
-                pendingPosition?.y ??
-                H / 2,
-
-            scale:
-
-                scale,
-
-            rotation:
-
-                (Math.random() - .5) *
-                .35
-
-        };
-
-
-        leaves.push(
-            newLeaf
-        );
-
-
-        selectedLeaf =
-            newLeaf;
-
-
-        saveTree();
-
-
-        modal.classList.remove(
-            "show"
-        );
-
-
-        pendingPosition =
-            null;
-
-
-        draw();
-
-
-        showToast(
-            "เพิ่มมือของ " +
-            name +
-            " แล้ว! 🌿"
-        );
-
+    if (!name) {
+        return;
     }
-);
 
+    const scale =
+        Math.min(W, H) / 720;
 
+    const newLeaf = {
+
+        id:
+            Date.now() +
+            Math.random(),
+
+        name:
+            name,
+
+        color:
+            COLORS[
+                Math.floor(
+                    Math.random() *
+                    COLORS.length
+                )
+            ],
+
+        x:
+            pendingPosition?.x ??
+            W / 2,
+
+        y:
+            pendingPosition?.y ??
+            H / 2,
+
+        scale:
+            scale,
+
+        rotation:
+            (Math.random() - 0.5) * 0.35
+
+    };
+
+    /* เพิ่มมือ */
+
+    leaves.push(newLeaf);
+
+    selectedLeaf = newLeaf;
+
+    /* บันทึก Firebase */
+
+    saveTree();
+
+    /* =====================================================
+       ปิด Popup ทันที
+    ===================================================== */
+
+    modal.classList.remove("show");
+
+    /* ล้างช่องชื่อ */
+
+    nameInput.value = "";
+
+    /* ล้างตำแหน่งที่รอ */
+
+    pendingPosition = null;
+
+    /* หยุด progress */
+
+    stopHoldProgress();
+
+    /* วาดใหม่ */
+
+    draw();
+
+    /* แจ้งเตือน */
+
+    showToast(
+        "เพิ่มมือของ " +
+        name +
+        " แล้ว! 🌿"
+    );
+
+});
 /* =========================================================
    CANCEL MODAL
 ========================================================= */
