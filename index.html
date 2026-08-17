@@ -963,18 +963,6 @@ leafImage.onerror = () => {
     console.error("❌ หา leaf.png ไม่เจอ");
 };
 
-treeImage.onload = () => {
-    draw();
-};
-
-handImage.onload = () => {
-    draw();
-};
-
-leafImage.onload = () => {
-    createAnimatedLeaves();
-    draw();
-};      
 
 /* =========================================================
    LOCAL STORAGE
@@ -986,28 +974,79 @@ function saveTree() {
 
     leaves.forEach((leaf, index) => {
 
-        let safeId = String(leaf.id)
-            .replace(/[.#$\/\[\]]/g, "_");
+        /* สร้าง key ที่ปลอดภัยสำหรับ Firebase */
+        let safeId = String(leaf.id || "");
 
-        /* ถ้า id เดิมมีปัญหา ให้สร้าง id ใหม่ */
+        /* ลบอักขระที่ Firebase ไม่อนุญาต */
+        safeId = safeId.replace(/[.#$\/\[\]]/g, "_");
 
-        if (!safeId) {
+        /* ถ้าไม่มี ID หรือ ID ไม่ปลอดภัย ให้สร้างใหม่ */
+        if (!safeId || safeId === "undefined" || safeId === "null") {
 
             safeId =
+                "hand_" +
                 Date.now().toString() +
                 "_" +
-                index;
+                index +
+                "_" +
+                Math.random()
+                    .toString(36)
+                    .substring(2, 8);
+
+        }
+
+        /* ป้องกันกรณี key ซ้ำ */
+        while (data[safeId]) {
+
+            safeId =
+                "hand_" +
+                Date.now().toString() +
+                "_" +
+                index +
+                "_" +
+                Math.random()
+                    .toString(36)
+                    .substring(2, 8);
 
         }
 
         data[safeId] = {
-            ...leaf,
-            id: safeId
+
+            name: String(leaf.name || ""),
+
+            color: String(leaf.color || "#8BCB88"),
+
+            x: Number(leaf.x) || W / 2,
+
+            y: Number(leaf.y) || H / 2,
+
+            scale: Number(leaf.scale) || 1,
+
+            rotation: Number(leaf.rotation) || 0
+
         };
 
     });
 
-    treeRef.set(data);
+    /* บันทึก Firebase */
+    treeRef.set(data)
+        .then(() => {
+
+            console.log("บันทึกต้นไม้สำเร็จ 🌳");
+
+        })
+        .catch(error => {
+
+            console.error(
+                "เกิดข้อผิดพลาดในการบันทึก Firebase:",
+                error
+            );
+
+            showToast(
+                "บันทึกข้อมูลไม่สำเร็จ"
+            );
+
+        });
 
     updateCounter();
 
@@ -2161,45 +2200,36 @@ nameForm.addEventListener("submit", event => {
 
 };
     /* เพิ่มมือ */
+/* เพิ่มมือ */
+leaves.push(newLeaf);
 
-    leaves.push(newLeaf);
+selectedLeaf = newLeaf;
 
-    selectedLeaf = newLeaf;
+/* ปิด Popup ทันที */
+modal.classList.remove("show");
 
-    /* บันทึก Firebase */
+/* ล้างช่องชื่อ */
+nameInput.value = "";
 
-    saveTree();
+/* ล้างตำแหน่งที่รอ */
+pendingPosition = null;
 
-    /* =====================================================
-       ปิด Popup ทันที
-    ===================================================== */
+/* หยุด progress */
+stopHoldProgress();
 
-    modal.classList.remove("show");
+/* วาดใหม่ */
+draw();
 
-    /* ล้างช่องชื่อ */
+/* บันทึก Firebase */
+saveTree();
 
-    nameInput.value = "";
-
-    /* ล้างตำแหน่งที่รอ */
-
-    pendingPosition = null;
-
-    /* หยุด progress */
-
-    stopHoldProgress();
-
-    /* วาดใหม่ */
-
-    draw();
-
-    /* แจ้งเตือน */
-
-    showToast(
-        "เพิ่มมือของ " +
-        name +
-        " แล้ว! 🌿"
-    );
-
+/* แจ้งเตือน */
+showToast(
+    "เพิ่มมือของ " +
+    name +
+    " แล้ว! 🌿"
+);
+      
 });
 /* =========================================================
    CANCEL MODAL
