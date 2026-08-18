@@ -849,14 +849,14 @@ const progressText =
 
 const COLORS = [
 
-    "#8BCB88",
-    "#FF9B5C",
-    "#FFD45C",
-    "#70B7E8",
-    "#D99BEA",
-    "#F28BA8",
-    "#79D5C5",
-    "#FFB86B"
+    "#3FA65C",
+    "#F26B38",
+    "#E5B800",
+    "#3D91C9",
+    "#9B59B6",
+    "#E85D75",
+    "#28A89A",
+    "#E98A25"
 
 ];
 
@@ -1269,45 +1269,60 @@ function drawHandImage(
     ----------------------------------------------------- */
 
     const coloredHand =
-        createColoredHand(
-            leaf.color
-        );
-
-
-    ctx.drawImage(
-        coloredHand,
-        -width / 2,
-        -height / 2,
-        width,
-        height
+    createColoredHand(
+        leaf.color
     );
+
+ctx.globalAlpha = 0.95;
+
+ctx.drawImage(
+    coloredHand,
+    -width / 2,
+    -height / 2,
+    width,
+    height
+);
+
+ctx.globalAlpha = 1;
 
 
     /* -----------------------------------------------------
        NAME
     ----------------------------------------------------- */
 
-    ctx.fillStyle =
-        "#26483b";
+   /* -----------------------------------------------------
+   NAME
+----------------------------------------------------- */
 
-    ctx.font =
-        `700 ${Math.max(
-            12,
-            15 * leaf.scale
-        )}px system-ui, "Noto Sans Thai", sans-serif`;
+ctx.fillStyle = "#ffffff";
 
-    ctx.textAlign =
-        "center";
+ctx.font =
+    `800 ${Math.max(
+        17,
+        21 * leaf.scale
+    )}px system-ui, "Noto Sans Thai", sans-serif`;
 
-    ctx.textBaseline =
-        "middle";
+ctx.textAlign = "center";
 
+ctx.textBaseline = "middle";
 
-    ctx.fillText(
-        leaf.name,
-        0,
-        height * .30
-    );
+/* เงาดำเล็กน้อย ทำให้ตัวอักษรอ่านง่ายบนรอยมือ */
+ctx.shadowColor = "rgba(0,0,0,.35)";
+ctx.shadowBlur = 4;
+ctx.shadowOffsetX = 1;
+ctx.shadowOffsetY = 1;
+
+ctx.fillText(
+    leaf.name,
+    0,
+    height * .30
+);
+
+/* ปิด shadow */
+ctx.shadowColor = "transparent";
+ctx.shadowBlur = 0;
+ctx.shadowOffsetX = 0;
+ctx.shadowOffsetY = 0;
 
 
     /* -----------------------------------------------------
