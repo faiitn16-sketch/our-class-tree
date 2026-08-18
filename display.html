@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+      content="width=device-width,
+               initial-scale=1.0">
+
+<title>Our Class Tree - Display</title>
+
+<style>
+
+html,
+body {
+
+    margin: 0;
+
+    width: 100%;
+    height: 100%;
+
+    overflow: hidden;
+
+    background: #f7ecd4;
+
+    font-family:
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Noto Sans Thai",
+        sans-serif;
+
+}
+
+#treeCanvas {
+
+    position: fixed;
+
+    inset: 0;
+
+    width: 100%;
+    height: 100%;
+
+    display: block;
+
+}
+
+.title {
+
+    position: fixed;
+
+    top: 20px;
+
+    left: 50%;
+
+    transform:
+        translateX(-50%);
+
+    z-index: 10;
+
+    margin: 0;
+
+    padding: 10px 24px;
+
+    border-radius: 999px;
+
+    background:
+        rgba(255,255,255,.85);
+
+    color: #25443a;
+
+    font-size:
+        clamp(28px, 4vw, 52px);
+
+    font-weight: 800;
+
+    box-shadow:
+        0 8px 25px
+        rgba(0,0,0,.12);
+
+}
+
+.counter {
+
+    position: fixed;
+
+    left: 20px;
+
+    bottom: 20px;
+
+    z-index: 10;
+
+    padding: 10px 18px;
+
+    border-radius: 999px;
+
+    background:
+        rgba(255,255,255,.85);
+
+    color: #25443a;
+
+    font-size: 18px;
+
+    font-weight: 600;
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<canvas id="treeCanvas"></canvas>
+
+
+<h1 class="title">
+🌳 Our Class Tree
+</h1>
+
+
+<div
+    class="counter"
+    id="counter">
+
+    ใบไม้ของเรา 0 ใบ
+
+</div>
+
+
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+
+<script>
+
+const firebaseConfig = {
+
+    apiKey:
+        "AIzaSyCoqXj41sxtaRszOH9TbenwFlVjHgwiAA",
+
+    authDomain:
+        "our-class-tree-ef0e9.firebaseapp.com",
+
+    databaseURL:
+        "https://our-class-tree-ef0e9-default-rtdb.firebaseio.com",
+
+    projectId:
+        "our-class-tree-ef0e9",
+
+    storageBucket:
+        "our-class-tree-ef0e9.firebasestorage.app",
+
+    messagingSenderId:
+        "401725741242",
+
+    appId:
+        "1:401725741242:web:8b416b2492b1328c4e0a83"
+
+};
+
+
+firebase.initializeApp(
+    firebaseConfig
+);
+
+
+const database =
+    firebase.database();
+
+
+const treeRef =
+    database.ref(
+        "ourClassTree"
+    );
+
+
+console.log(
+    "Display Firebase connected!"
+);
+
+
+const canvas =
+    document.getElementById(
+        "treeCanvas"
+    );
+
+
+const ctx =
+    canvas.getContext(
+        "2d"
+    );
+
+
+const counter =
+    document.getElementById(
+        "counter"
+    );
+
+
+let leaves = [];
+
+
+let W = 0;
+let H = 0;
+let DPR = 1;
+
+
+const treeImage =
+    new Image();
+
+treeImage.src =
+    "./tree.png";
+
+
+const handImage =
+    new Image();
+
+handImage.src =
+    "./hand.png";
+
+
+const leafImage =
+    new Image();
+
+leafImage.src =
+    "./leaf.png";
+
+
+treeImage.onload =
+    draw;
+
+
+handImage.onload =
+    draw;
+
+
+leafImage.onload =
+    draw;
+
+
+function resizeCanvas() {
+
+    DPR =
+        Math.min(
+            window.devicePixelRatio || 1,
+            2
+        );
+
+
+    W =
+        window.innerWidth;
+
+
+    H =
+        window.innerHeight;
+
+
+    canvas.width =
+        W * DPR;
+
+
+    canvas.height =
+        H * DPR;
+
+
+    canvas.style.width =
+        W + "px";
+
+
+    canvas.style.height =
+        H + "px";
+
+
+    ctx.setTransform(
+        DPR,
+        0,
+        0,
+        DPR,
+        0,
+        0
+    );
+
+
+    draw();
+
+}
+
+
+window.addEventListener(
+    "resize",
+    resizeCanvas
+);
+
+
+function drawBackground() {
+
+    ctx.fillStyle =
+        "#f7ecd4";
+
+
+    ctx.fillRect(
+        0,
+        0,
+        W,
+        H
+    );
+
+
+    if (
+        !treeImage.complete ||
+        !treeImage.naturalWidth
+    ) {
+
+        return;
+
+    }
+
+
+    const imageRatio =
+        treeImage.width /
+        treeImage.height;
+
+
+    const screenRatio =
+        W / H;
+
+
+    let drawWidth;
+    let drawHeight;
+    let offsetX;
+    let offsetY;
+
+
+    if (
+        imageRatio >
+        screenRatio
+    ) {
+
+        drawHeight = H;
+
+        drawWidth =
+            H * imageRatio;
+
+        offsetX =
+            (W - drawWidth) / 2;
+
+        offsetY = 0;
+
+    }
+
+    else {
+
+        drawWidth = W;
+
+        drawHeight =
+            W / imageRatio;
+
+        offsetX = 0;
+
+        offsetY =
+            (H - drawHeight) / 2;
+
+    }
+
+
+    ctx.drawImage(
+
+        treeImage,
+
+        offsetX,
+        offsetY,
+
+        drawWidth,
+        drawHeight
+
+    );
+
+}
+
+
+const handColorCache = {};
+
+
+function createColoredHand(color) {
+
+    if (
+        handColorCache[color]
+    ) {
+
+        return handColorCache[color];
+
+    }
+
+
+    const offscreen =
+        document.createElement(
+            "canvas"
+        );
+
+
+    offscreen.width =
+        handImage.naturalWidth;
+
+
+    offscreen.height =
+        handImage.naturalHeight;
+
+
+    const offCtx =
+        offscreen.getContext(
+            "2d"
+        );
+
+
+    offCtx.fillStyle =
+        color;
+
+
+    offCtx.fillRect(
+        0,
+        0,
+        offscreen.width,
+        offscreen.height
+    );
+
+
+    offCtx.globalCompositeOperation =
+        "destination-in";
+
+
+    offCtx.drawImage(
+        handImage,
+        0,
+        0
+    );
+
+
+    offCtx.globalCompositeOperation =
+        "source-over";
+
+
+    handColorCache[color] =
+        offscreen;
+
+
+    return offscreen;
+
+}
+
+
+function drawHand(
+    leaf
+) {
+
+    if (
+        !handImage.complete ||
+        !handImage.naturalWidth
+    ) {
+
+        return;
+
+    }
+
+
+    ctx.save();
+
+
+    const baseSize =
+        170;
+
+
+    const width =
+        baseSize *
+        leaf.scale;
+
+
+    const height =
+        baseSize *
+        (
+            handImage.height /
+            handImage.width
+        ) *
+        leaf.scale;
+
+
+    ctx.translate(
+        leaf.x,
+        leaf.y
+    );
+
+
+    ctx.rotate(
+        leaf.rotation || 0
+    );
+
+
+    /*
+     * เงา
+     */
+
+    ctx.save();
+
+    ctx.globalAlpha =
+        0.20;
+
+    ctx.filter =
+        "brightness(0)";
+
+
+    ctx.drawImage(
+
+        handImage,
+
+        -width / 2 + 5,
+
+        -height / 2 + 7,
+
+        width,
+
+        height
+
+    );
+
+
+    ctx.restore();
+
+
+    /*
+     * รอยมือสี
+     */
+
+    const coloredHand =
+        createColoredHand(
+            leaf.color
+        );
+
+
+    ctx.globalAlpha =
+        1;
+
+
+    ctx.drawImage(
+
+        coloredHand,
+
+        -width / 2,
+
+        -height / 2,
+
+        width,
+
+        height
+
+    );
+
+
+    /*
+     * ชื่อ
+     */
+
+    ctx.fillStyle =
+        "#ffffff";
+
+
+    ctx.font =
+        `800 ${Math.max(
+            22,
+            28 * leaf.scale
+        )}px system-ui, "Noto Sans Thai", sans-serif`;
+
+
+    ctx.textAlign =
+        "center";
+
+
+    ctx.textBaseline =
+        "middle";
+
+
+    ctx.shadowColor =
+        "rgba(0,0,0,.45)";
+
+
+    ctx.shadowBlur =
+        5;
+
+
+    ctx.shadowOffsetX =
+        1;
+
+
+    ctx.shadowOffsetY =
+        2;
+
+
+    ctx.fillText(
+
+        leaf.name,
+
+        0,
+
+        height * .30
+
+    );
+
+
+    ctx.shadowColor =
+        "transparent";
+
+
+    ctx.shadowBlur = 0;
+
+
+    ctx.restore();
+
+}
+
+
+function draw() {
+
+    ctx.clearRect(
+        0,
+        0,
+        W,
+        H
+    );
+
+
+    drawBackground();
+
+
+    for (
+        const leaf of leaves
+    ) {
+
+        drawHand(leaf);
+
+    }
+
+}
+
+
+treeRef.on(
+    "value",
+    snapshot => {
+
+        const data =
+            snapshot.val();
+
+
+        if (data) {
+
+            leaves =
+                Object.values(data);
+
+        }
+
+        else {
+
+            leaves = [];
+
+        }
+
+
+        counter.textContent =
+            `ใบไม้ของเรา ${leaves.length} ใบ`;
+
+
+        draw();
+
+    }
+);
+
+
+resizeCanvas();
+
+</script>
+
+
+</body>
+
+</html>
